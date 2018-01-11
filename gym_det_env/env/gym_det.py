@@ -84,7 +84,7 @@ class Determinant_v1(gym.Env):
 
             self.target_determinant = 1.0
 
-            self.n = 3
+            self.n = 6
 
             self.action_space = spaces.Box(low=np.array([0]), high=np.array([self.n ** 2]))
             self.observation_space = spaces.Box(low=0., high=1., shape=(self.n * self.n))
@@ -120,12 +120,21 @@ class Determinant_v1(gym.Env):
                 new_matrix[action] = 0.
                 self.matrix = new_matrix.reshape([self.n, self.n])
 
-            reward = - ((self.target_determinant - np.linalg.det(self.matrix)) ** 2)
+
+            EPSILON = 0.0001
+            reward = 0
+            if (self.target_determinant - np.linalg.det(self.matrix)) ** 2 >= EPSILON:
+                reward = -1
+            if (self.target_determinant - np.linalg.det(self.matrix)) ** 2 < EPSILON:
+                reward = 20
 
             self.observation = self.matrix.reshape(self.n ** 2)
 
             self.guess_count += 1
-            done = self.guess_count >= self.guess_max
+            done = self.guess_count >= self.guess_max or reward > 0
+
+            #if done:
+            #    print(self.matrix, np.linalg.det(self.matrix))
 
             return self.observation, reward, done, {"matrix": self.matrix, "guesses": self.guess_count}
 

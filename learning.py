@@ -1,5 +1,7 @@
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 from tensorforce.agents import PPOAgent
 from tensorforce.execution import Runner
 from tensorforce.contrib.openai_gym import OpenAIGym
@@ -21,12 +23,12 @@ env = OpenAIGym('GymDet-v1')
 network_spec = [
     {
         "type": "dense",
-        "size": 128
+        "size": 16
     },
 
     {
         "type": "dense",
-        "size": 128
+        "size": 16
     }
 ]
 
@@ -35,12 +37,12 @@ agent = PPOAgent(
     states_spec=env.states,
     actions_spec=env.actions,
     network_spec=network_spec,
-    batch_size=4096,
+    batch_size=2**12,
     # BatchAgent
     keep_last_timestep=True,
     # PPOAgent
     step_optimizer=dict(
-        type='adam',
+        type='rmsprop',
         learning_rate=1e-3
     ),
     optimization_steps=10,
@@ -73,10 +75,18 @@ def episode_finished(r):
 
 
 # Start learning
-runner.run(episodes=30000, max_episode_timesteps=2000, episode_finished=episode_finished)
+runner.run(episodes=500, max_episode_timesteps=200, episode_finished=episode_finished)
 
 # Print statistics
 print("Learning finished. Total episodes: {ep}. Average reward of last 100 episodes: {ar}.".format(
     ep=runner.episode,
     ar=np.mean(runner.episode_rewards[-100:]))
 )
+
+plt.figure(1)
+plt.subplot(211)
+plt.plot(runner.episode_rewards)
+
+plt.subplot(212)
+plt.plot(runner.episode_timesteps)
+plt.show()
