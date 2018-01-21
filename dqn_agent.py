@@ -57,7 +57,7 @@ def episode_finished(r):
 
 # Start learning
 
-runner.run(episodes=20000, max_episode_timesteps=300, episode_finished=episode_finished)
+runner.run(episodes=2000, max_episode_timesteps=300, episode_finished=episode_finished)
 
 # Print statistics
 print("Learning finished. Total episodes: {ep}. Average reward of last 1000 episodes: {ar}.".format(
@@ -65,6 +65,7 @@ print("Learning finished. Total episodes: {ep}. Average reward of last 1000 epis
     ar=np.mean(runner.episode_rewards[-1000:]))
 )
 
+agent.save_model('agents/dqn_agent_trained.MODEL', append_timestep=True)
 
 print(' ')
 print('Time: ', time.time() - start_time)

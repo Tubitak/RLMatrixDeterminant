@@ -3,7 +3,7 @@ from gym import spaces
 from gym.utils import seeding
 import numpy as np
 
-EPSILON = 1e-8
+EPSILON = 1e-10
 
 
 def uporedi(a, b):
@@ -247,7 +247,9 @@ class Determinant_v2(gym.Env):
         m1 = np.random.randint(0, 2, [self.n, self.n]).astype(np.float32)
         m2 = m1.copy()
         self.matrix1 = np.tril(m1) + np.tril(m1, -1).T
+        np.fill_diagonal(self.matrix1, 0)
         self.matrix2 = np.tril(m2) + np.tril(m2, -1).T
+        np.fill_diagonal(self.matrix2, 0)
         self.matrix = np.append(self.matrix1.flatten(), self.matrix2.flatten())
 
 
@@ -308,22 +310,23 @@ class Determinant_v2(gym.Env):
 
 
 
-        d_spektri = razlika_spektara(self.g1, self.g2)
+        #d_spektri = razlika_spektara(self.g1, self.g2)
         d_mini_spektri = razlika_mini_spektara(self.g1, self.g2)
 
         if reward==0:
-            reward = 1 - d_mini_spektri
-        if d_spektri < EPSILON:
-            reward = -1000
+            reward = 2** (5 - d_mini_spektri)
+
+        #if d_spektri < EPSILON:
+        #    reward = -1000
 
         self.observation = self.matrix
 
         self.guess_count += 1
-        done = self.guess_count >= self.guess_max or (reward >= 1 - EPSILON and d_spektri >= EPSILON)
+        #done = self.guess_count >= self.guess_max or (reward >= 1 - EPSILON and d_spektri >= EPSILON)
+        done = self.guess_count >= self.guess_max or (d_mini_spektri<EPSILON)
 
-        if reward >= 1 - EPSILON and d_spektri >= EPSILON:
-            print(d_spektri, d_mini_spektri)
-            print(self.matrix1, self.matrix2)
+        if done:
+            print(d_mini_spektri)
 
         return self.observation, reward, done, {"matrix": self.matrix, "guesses": self.guess_count}
 
@@ -331,7 +334,9 @@ class Determinant_v2(gym.Env):
         m1 = np.random.randint(0, 2, [self.n, self.n]).astype(np.float32)
         m2 = m1.copy()
         self.matrix1 = np.tril(m1) + np.tril(m1, -1).T
+        np.fill_diagonal(self.matrix1, 0)
         self.matrix2 = np.tril(m2) + np.tril(m2, -1).T
+        np.fill_diagonal(self.matrix2, 0)
         self.matrix = np.append(self.matrix1.flatten(), self.matrix2.flatten())
 
         self.g1 = nx.from_numpy_matrix(self.matrix1)
