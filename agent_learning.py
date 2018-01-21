@@ -1,5 +1,5 @@
 import numpy as np
-
+import time
 from tensorforce.agents.vpg_agent import VPGAgent
 from tensorforce.agents.trpo_agent import TRPOAgent
 from tensorforce.agents.ppo_agent import PPOAgent
@@ -11,16 +11,12 @@ from tensorforce.execution import Runner
 from tensorforce.contrib.openai_gym import OpenAIGym
 import gym_det_env
 
-# Create an OpenAIgym environment
-env = OpenAIGym('GymDet-v0')
 
-'''
-{
-    "type": "embedding",
-    "indices": 100,
-    "size": 32
-},
-'''
+
+#https://github.com/reinforceio/tensorforce/tree/master/examples/configs
+
+# Create an OpenAIgym environment
+env = OpenAIGym('GymDet-v1')
 
 # Network as list of layers
 network_spec = [
@@ -50,15 +46,22 @@ agents = dict(
     dqn_agent=DQNAgent,
     ddqn_agent=DDQNAgent,
     dqn_nstep_agent=DQNNstepAgent,
-    dqfd_agent=DQFDAgent
+    #dqfd_agent=DQFDAgent
 )
 
 scores = {}
 
+start_time = time.time()
+
 for agent_class in agents.values():
     print(agent_class)
-    env = OpenAIGym('GymDet-v0')
-    agent = agent_class(states_spec=env.states, actions_spec=env.actions, network_spec=network_spec)
+    env = OpenAIGym('GymDet-v1')
+
+    agent = agent_class(
+        states_spec=env.states,
+        actions_spec=env.actions,
+        network_spec=network_spec
+    )
 
     runner = Runner(agent=agent, environment=env)
 
@@ -71,7 +74,7 @@ for agent_class in agents.values():
 
 
     # Start learning
-    runner.run(episodes=10000, max_episode_timesteps=200, episode_finished=None)
+    runner.run(episodes=1000, max_episode_timesteps=300, episode_finished=None)
 
     # Print statistics
     print("Learning finished. Total episodes: {ep}. Average reward of last 100 episodes: {ar}.".format(
@@ -81,5 +84,7 @@ for agent_class in agents.values():
 
     scores[agent_class] = np.mean(runner.episode_rewards[-100:])
 
+print(' ')
+print('Time: ', time.time() - start_time)
 for agent, score in scores.items():
     print(agent, score)

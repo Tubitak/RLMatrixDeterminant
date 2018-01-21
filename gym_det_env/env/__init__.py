@@ -1,1 +1,1 @@
-from gym_det_env.env.gym_det import Determinant_v0, Determinant_v1
+from gym_det_env.env.gym_det import Determinant_v0, Determinant_v1, Determinant_v2
